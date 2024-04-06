@@ -150,7 +150,7 @@ class NeuralNetwork:
             i += 1
 
 
-    def trainNetworkGradDec(self, trainingInput: np.array, expectedOutputMatrix: np.array, iterationNum : int) -> None:
+    def trainNetworkGradDec(self, trainingInput: np.array, expectedOutputMatrix: np.array, gradientStepSize : float = 0.01) -> None:
         """
         Given testInput and the expected outputs for the inputs, this function will "train" the network on the data.
         """
@@ -201,7 +201,7 @@ class NeuralNetwork:
         print("GradientLength: ", lenOfGrad)
 
         #! Determine other ways to downscale the effect of the gradient, when we get closer to a local minima
-        negativeGradient = -gradient * 0.1 / (1 + 0.1 * iterationNum)
+        negativeGradient = -gradient * 0.01
 
         # Applies the negative gradient to every weight and bias in the network
         i : int = 0
