@@ -4,7 +4,7 @@ def sigmoid(x : float) -> float:
         return 1/(1+np.exp(-x))
 
 
-# Parent class for all layers
+#* Parent class for all layers
 class Layer:
     def __init__(self):
         ...
@@ -17,7 +17,7 @@ class Layer:
 
 
 #* Definition of layer types
-# InputLayer
+#* InputLayer
 class InputLayer(Layer):
     def __init__(self, inputShape : tuple[int, int]):
         self.layerIndex : int = 0
@@ -31,7 +31,7 @@ class InputLayer(Layer):
         return
 
 
-# PerceptronLayer / Fully Connected Layer
+#* PerceptronLayer / Fully Connected Layer
 class PerceptronLayer(Layer):
     def __init__(self, inputLayer : Layer, layerNum : int, layerSize: int) -> None:
         self.layerType : int = "Perceptron"
@@ -59,7 +59,7 @@ class PerceptronLayer(Layer):
 
     
 
-# TODO : Convolution layer
+#* Convolution layer
 # Has a filter which it convolves across the input, and thus produces a new matrix, which i smaller than the input
 class ConvolutionLayer(Layer):
     def __init__(self, inputLayer : Layer, layerNum : int, layerSize : int, filterSize : int):
@@ -100,7 +100,7 @@ class ConvolutionLayer(Layer):
         ...
 
 
-# TODO : Pooling layer
+#* PoolingLayer
 # Takes input from a convolutional layer, which is an image (matrix), and downscales it using either maxPooling or averagePooling
 class PoolingLayer(Layer):
     def __init__(self, inputLayer : Layer, layerNum : int, layerSize : int, downScale : int):
@@ -188,7 +188,8 @@ class NeuralNetwork:
             raise Exception("Input shape does not match the shape of the first layer.")
         self.input = input
 
-    #! Skal laves om
+
+    # TODO : Implementer gradient descent
     def trainNetworkGradDec(self, trainingInput: np.array, expectedOutputMatrix: np.array, gradientStepSize : float = 0.01) -> None:
         """
         Given testInput and the expected outputs for the inputs, this function will "train" the network on the data.
