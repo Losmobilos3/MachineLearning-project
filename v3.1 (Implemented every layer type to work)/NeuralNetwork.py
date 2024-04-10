@@ -41,7 +41,8 @@ class PerceptronLayer(Layer):
         self.layerIndex : int = layerNum
         self.layerSize : int = layerSize
         self.inputLayer : Layer = inputLayer
-        self.matrix : np.array = np.ndarray([layerSize, inputLayer.layerSize])
+        inputRows, inputCols = self.inputLayer.output[0].shape
+        self.matrix : np.array = np.ndarray([layerSize, inputLayer.layerSize*inputRows*inputCols])
         self.bias : np.array = np.ndarray([layerSize, 1])
         self.output : np.array = np.ndarray([layerSize, 1])
         # Init of variables
@@ -54,7 +55,12 @@ class PerceptronLayer(Layer):
         """
         Computes activation of every node in the layer.
         """
-        self.output = sigmoid(self.matrix @ self.inputLayer.output) + self.bias
+        # Laver billedoutput om til en 1 dimensionel array
+        if type(self.inputLayer.output) == list:
+            input = np.concatenate(self.inputLayer.output, axis=0)
+            input = np.concatenate(input, axis=0) [:, np.newaxis]
+        
+        self.output = sigmoid(self.matrix @ input + self.bias)
 
     # TODO : Implement gradient descent
     def gradDesc() -> np.array:
