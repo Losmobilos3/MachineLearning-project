@@ -15,6 +15,9 @@ class Layer:
     def gradDesc() -> None:
         ...
 
+    def setActivation(self, data : np.array):
+        ...
+
 
 #* Definition of layer types
 #* InputLayer
@@ -23,7 +26,7 @@ class InputLayer(Layer):
         self.layerIndex : int = 0
         self.output : np.array = np.ndarray(inputShape)
 
-    def setInput(self, data : np.array):
+    def setActivation(self, data : np.array):
         self.output = data
 
     # Nothing has to be trained in the inputLayer
@@ -57,37 +60,46 @@ class PerceptronLayer(Layer):
     def gradDesc() -> np.array:
         ...
 
+    def setActivation(self, data : np.array):
+        raise Exception("Not allowed to set activation!")
+
+        
+
     
 
 #* Convolution layer
 # Has a filter which it convolves across the input, and thus produces a new matrix, which i smaller than the input
 class ConvolutionLayer(Layer):
     def __init__(self, inputLayer : Layer, layerNum : int, layerSize : int, filterSize : int):
+        # Init of layer variables
         self.layerType : int = "Convolutional"
         self.layerIndex : int = layerNum
         self.inputLayer : Layer = inputLayer
-        shapeOfOutput = [dim - (filterSize-1) for dim in self.inputLayer.output.shape]
         self.layerSize : int = layerSize
 
-        self.filters : list[np.array] = []
         # TODO : Implementer måde hvorpå hvert filter i laget kan defineres
+        # Init of filters
+        self.filters : list[np.array] = []
         for _ in range(layerSize):
             self.filters.append(np.ndarray([filterSize, filterSize]))
 
-        self.output : list[np.array] = []
-        for _ in range(layerSize):
-            self.output.append(np.ndarray([shapeOfOutput[0], shapeOfOutput[1]]))
-        
-        # Init of variables
         for k in range(len(self.filters)):
             for i in range(filterSize):
                 for j in range(filterSize):
                     self.filters[k][i, j] = (np.random.rand() - 0.5) * 2
+
+        # Sets output shape
+        self.output : list[np.array] = []
+        shapeOfOutput = [dim - (filterSize-1) for dim in self.inputLayer.output.shape]
+        for _ in range(layerSize):
+            self.output.append(np.ndarray([shapeOfOutput[0], shapeOfOutput[1]]))
+        
     
+
     def computeLayerActivation(self) -> None:
         input = self.inputLayer.output
         inputRows, inputColumns = input.shape
-        imageDecrease, _ = self.filter[0].shape - 1
+        imageDecrease = self.filters[0].shape[0] - 1
         for k in range(len(self.filters)):
             for i in range(inputRows)[int(imageDecrease/2): int(-imageDecrease/2)]:
                 for j in range(inputColumns)[int(imageDecrease/2): int(-imageDecrease)]:
@@ -95,9 +107,19 @@ class ConvolutionLayer(Layer):
             
             self.output[k] = sigmoid(self.output[k])
     
+
+
     # TODO : Implement Gradient descent function for convolutional layer
     def gradDesc() -> np.array:
         ...
+
+
+
+    def setActivation(self, data : np.array):
+        raise Exception("Not allowed to set activation!")
+
+
+
 
 
 #* PoolingLayer
@@ -118,17 +140,22 @@ class PoolingLayer(Layer):
         self.downScale = downScale
 
     def computeLayerActivation(self) -> None:
-        input = self.inputLayer.output
+        input = self.inputLayer.output[0]
         input = np.hstack([input, np.zeros([input.shape[0], self.downScale - input.shape[1] % self.downScale])])
         input = np.vstack([input, np.zeros([self.downScale - input.shape[0] % self.downScale, input.shape[1]])])
         for k in range(len(self.output)):
-            for i in range(self.output.shape[1]):
-                for j in range(self.output.shape[0]):
-                    self.output[k][i*self.downScale, j*self.downScale] = max(input[i*self.downScale: i*self.downScale + self.downScale, j*self.downScale: j*self.downScale + self.downScale])
+            for i in range(self.output[0].shape[1]):
+                for j in range(self.output[0].shape[0]):
+                    row = i*self.downScale
+                    col = j*self.downScale
+                    self.output[k][i, j] = np.max(input[row: row + self.downScale, col: col + self.downScale])
         
     # TODO: Implement Gradient descent function for pooling layer
     def gradDesc() -> np.array:
         ...
+
+    def setActivation(self, data : np.array):
+        raise Exception("Not allowed to set activation!")
 
 class NeuralNetwork:
     def __init__(self, layerDescription : list[dict[str]]) -> None:
@@ -184,9 +211,10 @@ class NeuralNetwork:
         """
         Make sure the network is setup correctly to take the correct amount of inputs.
         """
-        if self.input.shape != input.shape:
+        if self.layers[0].output.shape != input.shape:
+            print(self.layers[0].output.shape, input.shape)
             raise Exception("Input shape does not match the shape of the first layer.")
-        self.input = input
+        self.layers[0].setActivation(input)
 
 
     # TODO : Implementer gradient descent
