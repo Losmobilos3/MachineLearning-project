@@ -42,7 +42,12 @@ class PerceptronLayer(Layer):
         self.layerSize : int = layerSize
         self.inputLayer : Layer = inputLayer
         inputRows, inputCols = self.inputLayer.output[0].shape
-        self.matrix : np.array = np.ndarray([layerSize, inputLayer.layerSize*inputRows*inputCols])
+        # Output from prev layer has to be unrolled if not a perceptron layer
+        if self.inputLayer.layerType != "Perceptron":
+            inputRows, inputCols = self.inputLayer.output[0].shape
+            self.matrix : np.array = np.ndarray([layerSize, inputLayer.layerSize*inputRows*inputCols])
+        else:
+            self.matrix : np.array = np.ndarray([layerSize, inputLayer.layerSize])
         self.bias : np.array = np.ndarray([layerSize, 1])
         self.output : np.array = np.ndarray([layerSize, 1])
         # Init of variables
